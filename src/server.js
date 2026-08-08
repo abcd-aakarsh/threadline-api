@@ -4,6 +4,8 @@ import express from "express";
 import mongoose from "mongoose";
 
 import { Product } from "./models/products.model.js";
+
+import { errorHandler } from "./middlewares/error.middleware.js";
 const app = express();
 const PORT = process.env.PORT || 8000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -14,18 +16,12 @@ app.get("/api/v1/health", (req, res) => {
   res.status(200).json({ success: true, message: "API is running" });
 });
 
-app.post("/api/v1/products", async (req, res) => {
+app.post("/api/v1/products", async (req, res, next) => {
   try {
     const product = await Product.create(req.body);
     res.status(201).json({ success: true, data: product });
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const details = Object.values(error.errors).map((e) => e.message);
-      return res
-        .status(400)
-        .json({ success: false, message: "Validation failed", details });
-    }
-    res.status(500).json({ success: false, message: "Something went wrong" });
+    next(error);
   }
 });
 
@@ -35,6 +31,8 @@ app.get("/api/v1/products", async (req, res) => {
     .status(200)
     .json({ success: true, count: products.length, data: products });
 });
+
+app.use(errorHandler);
 
 const start = async () => {
   await mongoose.connect(MONGO_URI);
