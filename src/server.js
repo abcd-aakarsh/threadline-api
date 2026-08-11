@@ -8,6 +8,7 @@ import { Product } from "./models/products.model.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
 import productRoutes from "./routes/product.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 const app = express();
 const PORT = process.env.PORT || 8000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -18,7 +19,7 @@ app.get("/api/v1/health", (req, res) => {
   res.status(200).json({ success: true, message: "API is running" });
 });
 app.use("/api/v1/products", productRoutes);
-
+app.use("/api/v1/auth", authRoutes);
 app.use(errorHandler);
 
 const start = async () => {
